@@ -5,6 +5,11 @@ from platform import node
 import numpy as np
 class IDSAgent:
     def __init__(self, cells, width) -> None:
+        """
+        Khởi tạo agent dùng thuật toán IDS (Iterative Deepening Search).
+        - cells: danh sách các giá trị trên bảng puzzle.
+        - width: chiều rộng của bảng puzzle (ví dụ: 3 cho 3x3).
+        """
         self.cells = cells
         self.width = width
         self.maximum_steps = 100000
@@ -13,7 +18,12 @@ class IDSAgent:
 
         self.h(self.cells)
         # i, num_cells = 0, len(self.cells)
+    
     def h(self, cells):
+        """
+        Tính toán heuristic ban đầu bằng khoảng cách Manhattan giữa vị trí hiện tại và vị trí đích của từng ô.
+        Giá trị này không dùng trực tiếp trong tìm kiếm IDS nhưng có thể dùng để xác định giới hạn độ sâu ban đầu.
+        """
         cnt = 0
         w = self.width
         for i, v in enumerate(cells, 1):
@@ -34,7 +44,10 @@ class IDSAgent:
         self.numberBeginSteps = cnt
 
     def findMinimumSteps(self):
-
+        """
+        Áp dụng thuật toán IDS để tìm lời giải ngắn nhất cho bài toán puzzle.
+        Trả về thời gian chạy và số bước để giải.
+        """
         start = time.time()
         for i in range(int(self.numberBeginSteps), int(self.maximum_steps)):
             IDSstack = list([Node(cells = self.cells, width = self.width)])
@@ -70,6 +83,14 @@ class IDSAgent:
 
 class Node:
     def __init__(self, cells, width:int, parent = None, p_action = None, ordinal_step = 0, cost = 0) -> None:
+        """
+        Đại diện cho một trạng thái của bảng puzzle.
+        - cells: cấu trúc bảng hiện tại.
+        - width: chiều rộng của bảng.
+        - parent: node cha (dùng để truy ngược đường đi).
+        - p_action: hành động dẫn đến node này.
+        - ordinal_step: số bước từ trạng thái gốc đến đây.
+        """
         self.cells = cells
         self.parent = parent
         self.p_action = p_action
@@ -77,6 +98,10 @@ class Node:
         self.width = int(width)
 
     def isSolved(self):
+        """
+        Kiểm tra trạng thái hiện tại có phải là trạng thái đích không.
+        Trạng thái đích là dãy tăng dần từ 1 đến n-1, ô trống là 0 ở cuối.
+        """
         i, num_cells = 0, len(self.cells)
         for i, v in enumerate(self.cells, 1):
             if (i != v):
@@ -86,6 +111,10 @@ class Node:
         return False
 
     def swapCell(self, r:int, c:int, i:int, j:int):
+        """
+        Đổi chỗ ô tại vị trí (r, c) với ô (i, j).
+        Trả về bảng mới sau khi đổi chỗ.
+        """
         clone_cells = list(self.cells)
         #print(self.cells)
         
@@ -95,6 +124,10 @@ class Node:
         return clone_cells
 
     def getNextStates(self):
+        """
+        Trả về danh sách trạng thái có thể đạt được từ trạng thái hiện tại,
+        bằng cách di chuyển ô trống (0) theo 4 hướng nếu hợp lệ.
+        """
         empty_space = self.cells.index(0)
         empty_space_row = empty_space // self.width
         empty_space_col = empty_space % self.width
@@ -113,11 +146,27 @@ class Node:
         
         #print(next_states)
         return next_states
+    
+    def getPath(self):
+        """
+        Truy ngược lại đường đi từ trạng thái gốc đến trạng thái hiện tại.
+        Trả về danh sách các trạng thái theo thứ tự thời gian.
+        """
+        path = []
+        node = self
+        while node.parent:
+            path.append(node.cells)
+            node = node.parent
+        path.append(node.cells)
+        return path[::-1]
 
-
-
-
-# # cells = [1,2,0,3]
-cells = [6, 3, 8, 0, 1, 5, 7, 2, 4]
-IDS = IDSAgent(cells, math.isqrt(len(cells)))
-print(IDS.findMinimumSteps())
+# ----------- Chạy thử thuật toán IDS với 1 ví dụ 3x3 -------------
+# cells = [6, 3, 8, 0, 1, 5, 7, 2, 4]
+# IDS = IDSAgent(cells, math.isqrt(len(cells)))
+# t, steps = IDS.findMinimumSteps()
+# print("Solution Path:")
+# for state in IDS.minimum_steps_node.getPath():
+#     for i in range(0, len(state), IDS.width):
+#         print(state[i:i+IDS.width])
+#     print("---")
+# print(f"Time: {t:.4f}s, Steps: {steps}")

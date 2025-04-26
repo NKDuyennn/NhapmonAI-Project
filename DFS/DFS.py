@@ -4,12 +4,14 @@ import math, time
 
 class DFSAgent:
     def __init__(self, cells, width) -> None:
+        # Khởi tạo agent với trạng thái ban đầu và kích thước bàn cờ
         self.cells = cells
         self.width = width
         self.minimum_steps = inf
         self.minimum_steps_node = None
 
     def findMinimumSteps(self):
+        # Tìm đường đi ngắn nhất bằng DFS
         start = time.time()
         DFSstack = list([Node(cells = self.cells, width = self.width)])
         # if using list, error: unhashable type: 'list'
@@ -41,6 +43,7 @@ class DFSAgent:
 
 class Node:
     def __init__(self, cells, width:int, parent = None, p_action = None, ordinal_step = 0) -> None:
+        # Lưu trạng thái của một nút trong cây tìm kiếm
         self.cells = cells
         self.parent = parent
         self.p_action = p_action
@@ -48,6 +51,7 @@ class Node:
         self.width = int(width)
 
     def isSolved(self):
+        # Kiểm tra trạng thái hiện tại đã phải trạng thái đích chưa
         i, num_cells = 0, len(self.cells)
         for i, v in enumerate(self.cells, 1):
             if (i != v):
@@ -57,6 +61,7 @@ class Node:
         return False
 
     def swapCell(self, r:int, c:int, i:int, j:int):
+        # Đổi chỗ hai ô trong ma trận (trạng thái mới sau một hành động)
         clone_cells = list(self.cells)
         #print(self.cells)
         
@@ -66,6 +71,7 @@ class Node:
         return clone_cells
     
     def getPath(self):
+        # Truy vết lại đường đi từ nút hiện tại về gốc
         path = []
         node = self
         while node.parent:
@@ -75,6 +81,7 @@ class Node:
         return path[::-1]
 
     def getNextStates(self):
+        # Sinh ra các trạng thái kế tiếp từ trạng thái hiện tại
         empty_space = self.cells.index(0)
         empty_space_row = empty_space // self.width
         empty_space_col = empty_space % self.width
@@ -94,13 +101,14 @@ class Node:
         #print(next_states)
         return next_states
 
-print("\nTest case : Gốc ban đầu")
-cells = [6,3,8,0,1,5,7,2,4]
-DFS = DFSAgent(cells, math.isqrt(len(cells)))
-t, steps = DFS.findMinimumSteps()
-print("Solution Path:")
-for state in DFS.minimum_steps_node.getPath():
-    for i in range(0, len(state), DFS.width):
-        print(state[i:i+DFS.width])
-    print("---")
-print(f"Time: {t:.4f}s, Steps: {steps}")
+# ----------- Chạy thử thuật toán IDS với 1 ví dụ 3x3 -------------
+# print("\nTest case : Gốc ban đầu")
+# cells = [6,3,8,0,1,5,7,2,4]
+# DFS = DFSAgent(cells, math.isqrt(len(cells)))
+# t, steps = DFS.findMinimumSteps()
+# print("Solution Path:")
+# for state in DFS.minimum_steps_node.getPath():
+#     for i in range(0, len(state), DFS.width):
+#         print(state[i:i+DFS.width])
+#     print("---")
+# print(f"Time: {t:.4f}s, Steps: {steps}")
