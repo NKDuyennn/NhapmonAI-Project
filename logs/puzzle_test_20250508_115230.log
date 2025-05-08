@@ -1,0 +1,118 @@
+HIỆU SUẤT THUẬT TOÁN TRÊN BÀI TOÁN BLOCK PUZZLE
+
+Thời gian chạy: 11:52:30 ngày 08/05/2025
+
+TESTCASES SỬ DỤNG:
+1. 8-PUZZLE (3x3):
+   - Case 1: [[0, 5, 7], [2, 1, 4], [3, 8, 6]]
+   - Case 2: [[5, 8, 2], [1, 7, 4], [6, 3, 0]]
+   - Case 3: [[6, 4, 0], [7, 1, 5], [2, 3, 8]]
+
+2. 15-PUZZLE (4x4):
+   - Case 1: [[1, 4, 3, 6], [5, 2, 0, 7], [9, 10, 12, 8], [13, 14, 11, 15]]
+   - Case 2: [[6, 5, 2, 3], [0, 7, 11, 4], [9, 1, 10, 8], [15, 14, 13, 12]]
+   - Case 3: [[0, 7, 2, 4], [6, 12, 1, 15], [13, 5, 9, 8], [10, 11, 3, 14]]
+
+3. 24-PUZZLE (5x5):
+   - Case 1: [[2, 0, 3, 4, 5], [1, 6, 8, 9, 10], [11, 7, 12, 14, 15], [21, 17, 13, 24, 19], [22, 16, 18, 23, 20]]
+   - Case 2: [[6, 1, 2, 14, 4], [16, 8, 3, 9, 5], [17, 7, 11, 24, 18], [13, 12, 10, 15, 19], [21, 22, 23, 20, 0]]
+   - Case 3: [[6, 1, 4, 9, 3], [11, 2, 7, 10, 0], [16, 12, 20, 13, 5], [17, 18, 8, 19, 15], [21, 22, 23, 24, 14]]
+
+KẾT QUẢ CHI TIẾT:
+
+=== 8-PUZZLE (3x3) - CASE 1 ===
+Bắt đầu: 11:52:30
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |   0.403013       | 26      | D R R U L D R D L L U R D R U L U R D D L L U R R D
+A* Linear         |   0.592972       | 28      | R R D L U L D D R U L D R R U L L U R R D L U L D R D R
+Greedy Manhattan  |   0.008433       | 34      | R D R U L L D D R U L U R R D L U R D L U L D R D L U R R D L U R D
+Greedy Linear     |   0.050895       | 56      | D R R U L D L U R R D L L U R D L D R U U L D R R D L L U U R D L D R R U L U R D L U L D R D L U R R D L U R D
+
+Kết thúc: 11:52:32 (Thời gian chạy test case: 1.06 giây)
+
+=== 8-PUZZLE (3x3) - CASE 2 ===
+Bắt đầu: 11:52:32
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |   0.009406       | 20      | D D R U R U L L D R R U L D R D L U U L
+A* Linear         |   0.021342       | 20      | D D R U R U L L D R R U L D R D L U U L
+Greedy Manhattan  |   0.009947       | 40      | R R D L U L D R R U L D L U R R D L L U R R D L L D R U U L D R U R D D L U U L
+Greedy Linear     |   0.009361       | 40      | R R D L U L D R R U L D L U R R D L L U R R D L L D R U U L D R U R D D L U U L
+
+Kết thúc: 11:52:32 (Thời gian chạy test case: 0.05 giây)
+
+=== 8-PUZZLE (3x3) - CASE 3 ===
+Bắt đầu: 11:52:32
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |   0.301360       | 26      | D R D L U U R D L D R R U L D L U R D R U U L D L D
+A* Linear         |   0.375083       | 26      | R R D L D R U U L D L D R R U L L D R R U U L D L D
+Greedy Manhattan  |   0.027354       | 48      | R D D L U R U L D D R U R U L L D R D L U U R R D L L D R U R D L U L D R U U L D R R U L L D D
+Greedy Linear     |   0.011407       | 50      | R R D L U L D R R U L L D R U L D R R U L D L U R R D L D R U L U R D L L D R U L U R D D L U R D L
+
+Kết thúc: 11:52:32 (Thời gian chạy test case: 0.72 giây)
+
+=== 15-PUZZLE (4x4) - CASE 1 ===
+Bắt đầu: 11:52:32
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |   0.035136       | 17      | R D L D R D L U R R D L U L D R U
+A* Linear         |   0.049115       | 17      | R D L D R D L U R R D L U L D R U
+Greedy Manhattan  |   0.092935       | 39      | D D D R U L U R D D L U R U L D D R U R U L L D R U R D D L L U U U R D L D R
+Greedy Linear     |   0.061076       | 39      | D D D R U L U R D D L U R U L D D R U R U L L D R U R D D L L U U U R D L D R
+
+Kết thúc: 11:52:33 (Thời gian chạy test case: 0.24 giây)
+
+=== 15-PUZZLE (4x4) - CASE 2 ===
+Bắt đầu: 11:52:33
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |   3.473702       | 31      | D R R U L D L D D R R U R D L U R U L U R D L D L U U R R D D
+A* Linear         |   2.952937       | 31      | D R R U L D L D D R R U R D L U R U L U R D L D L U U R R D D
+Greedy Manhattan  |   1.550058       | 95      | R D R R D D L U R U L D R U L L D R D R U U L D L U R R D L D L U U U R D D L D R U R U U L L L D R R U R D L U R D D D L U L U R R D L U L U R R D L L L U R R D R U L L L D D D R U U R D R
+Greedy Linear     |   0.219509       | 57      | D R D D R R U L D L U U U R D L L U R D R U R D L L U R D R U L L D R U L L D R U R D L U R D D L U L D D R R R U
+
+Kết thúc: 11:52:41 (Thời gian chạy test case: 8.21 giây)
+
+=== 15-PUZZLE (4x4) - CASE 3 ===
+Bắt đầu: 11:52:41
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |  49.177831       | 40      | D R U R D R D L L U L U R D L D R D R U U L D R U R D D L U R U U L L D D R D R
+A* Linear         |  38.729481       | 40      | D R U R D R D L L U L U R D L D R D R U U L D R U R D D L U R U U L L D D R D R
+Greedy Manhattan  |   6.239748       | 128     | D R D L U U R D L D R U U L D R D D L U U R D L D R U U R D L D R U U L D L U U R D L D R D R R U L L D R U R D L L U U U R D L D R U R D L L D R R U U U L L L D R R U R D L U L D L U R R D R U L D L U R D L L U R R R D D L U L D R U R U L L D L D R D R R
+Greedy Linear     |   3.663674       | 132     | R D L D R U U L D D R R U L L D R U R D L L D R U R D L L U R R D R U L L D R U R D L L U R R D L U L L D R U R D L L U R U L U R D D L U R U L D R R D D R U L L D R R U L U L L U R D L D R U U L D R D L U R U R D L L U R D R R U L L L D R D L U U R D R D L D R R
+
+Kết thúc: 11:54:19 (Thời gian chạy test case: 97.88 giây)
+
+=== 24-PUZZLE (5x5) - CASE 1 ===
+Bắt đầu: 11:54:19
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |   0.023136       | 17      | D R U R D R R U L D L D R D R D L
+A* Linear         |   0.022392       | 17      | D R U R D D R U R U L D D D R D L
+Greedy Manhattan  |   0.037109       | 19      | D R R R R U L D L L U R D D R D R D L
+Greedy Linear     |   0.008544       | 19      | D R R R R U L D L L U R D D R D R D L
+
+Kết thúc: 11:54:19 (Thời gian chạy test case: 0.09 giây)
+
+=== 24-PUZZLE (5x5) - CASE 2 ===
+Bắt đầu: 11:54:19
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |  38.502198       | 44      | D R U L D R R D R R U L L D R D L L U L D D R U U L U R D D R D R R U U U L L L D L U U
+A* Linear         | 204.371205       | 46      | R D L U R D R D D L U L D D R U R U R R U L L D L L U R D R R D L D R R U U U L L L D L U U
+Greedy Manhattan  |  28.866744       | 168     | R D R U L L D R U R D L L U R D R R U L L D R U R D L L D R U R D L L U R R D R U L L L D R R U R D L L D D L U R U L D D R U L U U R D D L U R U L D D R D R R U U U L D D R U L D L L U U R U L L D R U R D L L U R D R U L L D D D D R U U L U U R R D D R U L D R R U L L L L D R U U L D D R U R U L D L U R R D L U L D D R U L U R D L U
+Greedy Linear     |  16.053789       | 196     | R D R R U L D L U R R D L U L L D R R U L D L U R R D R D L U U R D L D R U U R D L D R U U L L D L U L D R R U L L D D R U U L D R D L D D R R U L D L U U R U L U R D D L U R U L D R R D D L U R R R U L L L L U R D L D R U U L D R D D R D R R U U U L D D L L U L D D R U U U L U R D D L U R U L D R R U L L D R U R D L L U R D L D R U U L D D R U R U L D L U R R D L U L D D R U L U R D L U
+
+Kết thúc: 11:59:07 (Thời gian chạy test case: 287.93 giây)
+
+=== 24-PUZZLE (5x5) - CASE 3 ===
+Bắt đầu: 11:59:07
+Thuật toán        | Thời gian (giây) | Số bước | Di chuyển
+------------------------------------------------------------
+A* Manhattan      |  52.928537       | 37      | R D D R D L D R U L L U U R D L D D R R U R D R U U U L L D L U U L D D D
+A* Linear         |  31.143875       | 37      | R D D R D L D R U L L U U R D L D D R R U R D R U U U L L D L U U L D D D
+Greedy Manhattan  |  11.035791       | 63      | D D R D L D R U U L D D R R U L L D R U R D L L U U U U R D D L U R U L D D R R D R D R U U U L L L L D R U R D L L D D R U L
+Greedy Linear     |  >600            | x       |
