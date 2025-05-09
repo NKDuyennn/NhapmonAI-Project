@@ -1,4 +1,3 @@
-from collections import deque
 from cmath import inf
 import math, time
 from platform import node
@@ -79,8 +78,6 @@ class IDSAgent:
         duration = end - start   
         return duration, self.minimum_steps #, self.minimum_steps_node.getPath()
     
-
-
 class Node:
     def __init__(self, cells, width:int, parent = None, p_action = None, ordinal_step = 0, cost = 0) -> None:
         """
@@ -160,7 +157,7 @@ class Node:
         path.append(node.cells)
         return path[::-1]
 
-# ----------- Chạy thử thuật toán IDS với 1 ví dụ 3x3 -------------
+#----------- Chạy thử thuật toán IDS với 1 ví dụ 3x3 -------------
 # cells = [6, 3, 8, 0, 1, 5, 7, 2, 4]
 # IDS = IDSAgent(cells, math.isqrt(len(cells)))
 # t, steps = IDS.findMinimumSteps()

@@ -1,4 +1,3 @@
-from collections import deque
 from cmath import inf
 import math, time
 
@@ -34,7 +33,6 @@ class DFSAgent:
                 if tuple(child.cells) not in visited:
                     DFSstack.append(child)
                     visited.add(tuple(child.cells))
-
 
         end = time.time()
         duration = end - start
