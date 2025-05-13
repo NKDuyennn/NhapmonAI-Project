@@ -316,6 +316,7 @@ class AASTERISK:
         moves = []
         for index in range(len(path)-1):
             moves.append(path[index].get_move(path[index+1]))
+        # print(f"{moves}")
         return end - begin, num_steps, moves
 
 class AASTERISKMisTiles(AASTERISK):

@@ -11,7 +11,6 @@ from numpy import empty
 from ui_object.Block import Block
 from algorithm.bfs.bfs import BFSAgent
 from algorithm.ids.ids import IDSAgent
-from algorithm.Uniformed.Uninformed_search import BFSAgent
 from algorithm.A_asterisk.A_asterisk import AASTERISK, AASTERISKMisTiles, AASTERISKWeighMHT, GreedyBestFirstSearch, AASTERISKLinearConflict, GreedyLinearConflict
 import math
 
@@ -616,34 +615,92 @@ class NumberNPuzzle(QMainWindow):
         self.onInit()
         self.show()
 
+    def reset(self):
+        """ Reset the puzzle to a new initial state """
+        # Update number of shuffles if provided
+        if self.textShuffle.text():
+            try:
+                self.num_suffle = int(self.textShuffle.text())
+            except ValueError:
+                self.num_suffle = 100  # Default value if input is invalid
+        
+        # Update number of rows
+        self.num_row = int(self.comboBox.currentText())
+        
+        # Clear existing widgets from the grid layout
+        for i in reversed(range(self.gltMain.count())):
+            widget = self.gltMain.itemAt(i).widget()
+            if widget is not None:
+                widget.setParent(None)
+        
+        # Reset blocks and start_blocks
+        self.blocks = []
+        self.start_blocks = []
+        self.way = []
+        
+        # Reset time and step labels
+        for i in range(1, 9):
+            getattr(self, f"time_value_{i}").setText("")
+            getattr(self, f"num_of_steps_value_{i}").setText("")
+        
+        # Reinitialize the puzzle
+        self.onInit()
+        
+        # Save the initial state
+        self.start_blocks = copy.deepcopy(self.blocks)
+        
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "N-puzzle Game"))
+
         def BFS():
             cells = [x for xs in self.blocks for x in xs]
             bfs = BFSAgent(cells, math.isqrt(len(cells)))
             time, num_steps, path = bfs.findMinimumSteps()
+
+            # Tạo path mới với các hướng bị đảo ngược
+            reversed_path = []
+            reverse_dir = {"R": "L", "L": "R", "U": "D", "D": "U"}
+            for step in path:
+                reversed_step = reverse_dir.get(step, step)  
+                reversed_path.append(reversed_step)
+            path = reversed_path
+
+            print(f"BFS: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_1.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_1.setText(_translate("Form", b))
             self.way = path
-            self.start_blocks = copy.deepcopy(self.blocks)
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         def IDS():
             cells = [x for xs in self.blocks for x in xs]
             ids = IDSAgent(cells, math.isqrt(len(cells)))
-            time, num_steps = ids.findMinimumSteps()
+            time, num_steps, path = ids.findMinimumSteps()  # Updated to unpack three values
+
+            # Tạo path mới với các hướng bị đảo ngược
+            reversed_path = []
+            reverse_dir = {"R": "L", "L": "R", "U": "D", "D": "U"}
+            for step in path:
+                reversed_step = reverse_dir.get(step, step)  
+                reversed_path.append(reversed_step)
+            path = reversed_path
+
+            print(f"IDS: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_2.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_2.setText(_translate("Form", b))
-            # IDS hiện không trả về path, thêm thông báo nếu cần
-            QMessageBox.information(self, "IDS", "IDS does not provide a path in this implementation.")
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
+
         def Greedy():
             agent = GreedyBestFirstSearch(self.blocks, len(self.blocks[0]))
             time, num_steps, path = agent.findMinimumSteps()
+            print(f"Greedy: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_3.setText(_translate("Form", str(a)))
             b = str(num_steps)
@@ -651,9 +708,11 @@ class NumberNPuzzle(QMainWindow):
             self.way = path
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         def AStarMT():
             a_star = AASTERISKMisTiles(self.blocks, len(self.blocks[0]))
             time, num_steps, path = a_star.findMinimumSteps()
+            print(f"AStarMT: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_4.setText(_translate("Form", str(a)))
             b = str(num_steps)
@@ -661,9 +720,11 @@ class NumberNPuzzle(QMainWindow):
             self.way = path
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         def AStarMHT():
             a_star = AASTERISK(self.blocks, len(self.blocks[0]))
             time, num_steps, path = a_star.findMinimumSteps()
+            print(f"AStarMHT: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_5.setText(_translate("Form", str(a)))
             b = str(num_steps)
@@ -671,9 +732,11 @@ class NumberNPuzzle(QMainWindow):
             self.way = path
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         def AStarWMHT():
             a_star = AASTERISKWeighMHT(self.blocks, len(self.blocks[0]))
             time, num_steps, path = a_star.findMinimumSteps()
+            print(f"AStarWMHT: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_6.setText(_translate("Form", str(a)))
             b = str(num_steps)
@@ -681,9 +744,11 @@ class NumberNPuzzle(QMainWindow):
             self.way = path
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         def AStarLC():
             a_star = AASTERISKLinearConflict(self.blocks, len(self.blocks[0]))
             time, num_steps, path = a_star.findMinimumSteps()
+            print(f"AStarLC: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_7.setText(_translate("Form", str(a)))
             b = str(num_steps)
@@ -691,9 +756,11 @@ class NumberNPuzzle(QMainWindow):
             self.way = path
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         def GreedyLC():
             agent = GreedyLinearConflict(self.blocks, len(self.blocks[0]))
             time, num_steps, path = agent.findMinimumSteps()
+            print(f"GreedyLC: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_8.setText(_translate("Form", str(a)))
             b = str(num_steps)
@@ -701,6 +768,7 @@ class NumberNPuzzle(QMainWindow):
             self.way = path
             if path:  # Only simulate if path exists
                 self.simulatePath(path)
+
         self.pushButton_1.setText(_translate("Form", "BFS"))
         self.pushButton_1.clicked.connect(BFS)
         self.pushButton_2.setText(_translate("Form", "IDS"))
@@ -732,6 +800,7 @@ class NumberNPuzzle(QMainWindow):
 
         self.comboBox.setCurrentText(str(self.num_row))
         self.resetBtn.setText(_translate("Form", "Reset"))
+
         def reset():
             # Update number of shuffles if provided
             if self.textShuffle.text():
@@ -851,34 +920,41 @@ class NumberNPuzzle(QMainWindow):
                 self.reset()
 
     def simulatePath(self, path):
-        self.start_blocks = copy.deepcopy(self.blocks)
-        # Create a copy of the path to avoid modifying the original
+        # Reset to initial state
+        self.blocks = copy.deepcopy(self.start_blocks)
+        for i in range(self.num_row):
+            for j in range(self.num_row):
+                if self.blocks[i][j] == 0:
+                    self.zero_row = i
+                    self.zero_column = j
+        self.updatePanel()
+        QApplication.processEvents()
+        # Simulate each move
         path_copy = path.copy()
-        while path_copy:
-            move = path_copy.pop(0)  # Use pop(0) to process moves in correct order
+        for move in path_copy:
             if move == 'D':
-                self.move(Direction.DOWN)  # Sửa: 'D' -> Direction.DOWN
+                self.move(Direction.DOWN)
             elif move == 'U':
-                self.move(Direction.UP)    # Sửa: 'U' -> Direction.UP
+                self.move(Direction.UP)
             elif move == 'R':
-                self.move(Direction.RIGHT) # Sửa: 'R' -> Direction.RIGHT
+                self.move(Direction.RIGHT)
             elif move == 'L':
-                self.move(Direction.LEFT)  # Sửa: 'L' -> Direction.LEFT
+                self.move(Direction.LEFT)
             self.updatePanel()
             QApplication.processEvents()
-            sleep(0.5)
+            sleep(0.5)  # Adjust sleep time for visibility
 
     def simulateOneStep(self):
         if self.way:
             move = self.way.pop(0)  # Use pop(0) to process moves in correct order
             if move == 'D':
-                self.move(Direction.DOWN)  # Sửa: 'D' -> Direction.DOWN
+                self.move(Direction.DOWN)
             elif move == 'U':
-                self.move(Direction.UP)    # Sửa: 'U' -> Direction.UP
+                self.move(Direction.UP)
             elif move == 'R':
-                self.move(Direction.RIGHT) # Sửa: 'R' -> Direction.RIGHT
+                self.move(Direction.RIGHT)
             elif move == 'L':
-                self.move(Direction.LEFT)  # Sửa: 'L' -> Direction.LEFT
+                self.move(Direction.LEFT)
             self.updatePanel()
 
     def move(self, direction):
@@ -925,6 +1001,8 @@ class NumberNPuzzle(QMainWindow):
                 if self.blocks[row][column] != row * self.num_row + column + 1:
                     return False
         return True
+    
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
