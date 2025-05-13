@@ -38,7 +38,7 @@ class IDSAgent:
 
         start = time.time()
         for i in range(int(self.numberBeginSteps), int(self.maximum_steps)):
-            IDSstack = list([Node(cells = self.cells, width = self.width)])
+            IDSstack = list([Node(cells=self.cells, width=self.width)])
             visited = set()
             while IDSstack:
                 node = IDSstack.pop()
@@ -49,23 +49,28 @@ class IDSAgent:
                     if node_ord_step < self.minimum_steps:
                         self.minimum_steps = node_ord_step
                         self.minimum_steps_node = node
-                    break
+                    end = time.time()
+                    duration = end - start
+                    temp = node
+                    path = []
+                    while temp.p_action is not None:
+                        path.append(temp.p_action)
+                        temp = temp.parent
+                    path.reverse()  # Đảo ngược path
+                    return duration, self.minimum_steps, path
 
                 if node_ord_step == i:
                     continue
                 neighbors = reversed(node.getNextStates())
                 for next_state, action in neighbors:
-                    child = Node(cells = next_state, width = self.width, parent = node, 
-                        ordinal_step = node_ord_step + 1)
+                    child = Node(cells=next_state, width=self.width, parent=node,
+                                p_action=action, ordinal_step=node_ord_step + 1)
                     if str(child.cells) + str(child.ordinal_step) not in visited:
                         IDSstack.append(child)
-                        visited.add(str(child.cells)+ str(child.ordinal_step) )                       
-            if self.minimum_steps != inf:
-                # print("Number of steps: " + str(self.minimum_steps))
-                break
+                        visited.add(str(child.cells) + str(child.ordinal_step))
         end = time.time()
-        duration = end - start   
-        return duration, self.minimum_steps #, self.minimum_steps_node.getPath()
+        duration = end - start
+        return duration, self.minimum_steps, []
     
 
 

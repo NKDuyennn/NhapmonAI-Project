@@ -276,7 +276,7 @@ class AASTERISK:
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                ##path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             # make sure we don't visit this state again.
@@ -357,7 +357,7 @@ class AASTERISKMisTiles(AASTERISK):
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                #path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             closedSet.add(current)
@@ -413,7 +413,7 @@ class AASTERISKWeighMHT(AASTERISK):
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                #path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             closedSet.add(current)
@@ -469,7 +469,7 @@ class AASTERISKMaxSwap(AASTERISK):
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                #path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             closedSet.add(current)
@@ -525,7 +525,7 @@ class AASTERISKLinearConflict(AASTERISK):
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                #path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             closedSet.add(current)
@@ -581,7 +581,7 @@ class GreedyBestFirstSearch(AASTERISK):
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                #path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             closedSet.add(current)
@@ -637,7 +637,7 @@ class GreedyLinearConflict(AASTERISK):
                     path.append(cameFrom[step])
                     step = cameFrom[step]
                     cnt = cnt + 1
-                #path.reverse()
+                path.reverse()
                 return cnt, end, path
 
             closedSet.add(current)

@@ -13,8 +13,7 @@ class BFSAgent:
 
     def findMinimumSteps(self):
         start = time.time()
-        BFSqueue = deque([Node(cells = self.cells, width = self.width)])
-        # if using list, error: unhashable type: 'list'
+        BFSqueue = deque([Node(cells=self.cells, width=self.width)])
         visited = set()
         visited.add(str(BFSqueue[0].cells))
 
@@ -22,19 +21,24 @@ class BFSAgent:
             node = BFSqueue.pop()
             node_ord_step = node.ordinal_step
             if node.isSolved():
-                if node_ord_step < self.minimum_steps:
-                    self.minimum_steps = node_ord_step
-                    self.minimum_steps_node = node
+                end = time.time()
+                duration = end - start
+                temp = node
+                path = []
+                while temp.p_action is not None:
+                    path.append(temp.p_action)
+                    temp = temp.parent
+                path.reverse()  # Đảo ngược path để đúng thứ tự
+                return duration, node_ord_step, path
             for next_state, action in node.getNextStates():
-                child = Node(cells = next_state, width = self.width, parent = node, 
-                    ordinal_step = node_ord_step + 1)
+                child = Node(cells=next_state, width=self.width, parent=node,
+                            p_action=action, ordinal_step=node_ord_step + 1)
                 if str(child.cells) not in visited:
                     BFSqueue.appendleft(child)
                     visited.add(str(child.cells))
-
         end = time.time()
         duration = end - start
-        return duration, self.minimum_steps #, self.minimum_steps_node.getPath()
+        return duration, self.minimum_steps, []
 
 class Node:
     def __init__(self, cells, width:int, parent = None, p_action = None, ordinal_step = 0) -> None:

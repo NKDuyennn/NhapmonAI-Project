@@ -629,7 +629,8 @@ class NumberNPuzzle(QMainWindow):
             self.num_of_steps_value_1.setText(_translate("Form", b))
             self.way = path
             self.start_blocks = copy.deepcopy(self.blocks)
-            #self.simulatePath(path)
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         def IDS():
             cells = [x for xs in self.blocks for x in xs]
             ids = IDSAgent(cells, math.isqrt(len(cells)))
@@ -638,48 +639,68 @@ class NumberNPuzzle(QMainWindow):
             self.time_value_2.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_2.setText(_translate("Form", b))
+            # IDS hiện không trả về path, thêm thông báo nếu cần
+            QMessageBox.information(self, "IDS", "IDS does not provide a path in this implementation.")
         def Greedy():
             agent = GreedyBestFirstSearch(self.blocks, len(self.blocks[0]))
-            time, num_steps, self.way = agent.findMinimumSteps()
+            time, num_steps, path = agent.findMinimumSteps()
             a = str(round(time, 5))
             self.time_value_3.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_3.setText(_translate("Form", b))
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         def AStarMT():
             a_star = AASTERISKMisTiles(self.blocks, len(self.blocks[0]))
-            time, num_steps, self.way = a_star.findMinimumSteps()
+            time, num_steps, path = a_star.findMinimumSteps()
             a = str(round(time, 5))
             self.time_value_4.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_4.setText(_translate("Form", b))
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         def AStarMHT():
             a_star = AASTERISK(self.blocks, len(self.blocks[0]))
-            time, num_steps, self.way = a_star.findMinimumSteps()
+            time, num_steps, path = a_star.findMinimumSteps()
             a = str(round(time, 5))
             self.time_value_5.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_5.setText(_translate("Form", b))
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         def AStarWMHT():
             a_star = AASTERISKWeighMHT(self.blocks, len(self.blocks[0]))
-            time, num_steps, self.way = a_star.findMinimumSteps()
+            time, num_steps, path = a_star.findMinimumSteps()
             a = str(round(time, 5))
             self.time_value_6.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_6.setText(_translate("Form", b))
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         def AStarLC():
             a_star = AASTERISKLinearConflict(self.blocks, len(self.blocks[0]))
-            time, num_steps, self.way = a_star.findMinimumSteps()
+            time, num_steps, path = a_star.findMinimumSteps()
             a = str(round(time, 5))
             self.time_value_7.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_7.setText(_translate("Form", b))
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         def GreedyLC():
             agent = GreedyLinearConflict(self.blocks, len(self.blocks[0]))
-            time, num_steps, self.way = agent.findMinimumSteps()
+            time, num_steps, path = agent.findMinimumSteps()
             a = str(round(time, 5))
             self.time_value_8.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_8.setText(_translate("Form", b))
+            self.way = path
+            if path:  # Only simulate if path exists
+                self.simulatePath(path)
         self.pushButton_1.setText(_translate("Form", "BFS"))
         self.pushButton_1.clicked.connect(BFS)
         self.pushButton_2.setText(_translate("Form", "IDS"))
@@ -777,20 +798,24 @@ class NumberNPuzzle(QMainWindow):
                     self.zero_row = row
                     self.zero_column = column
                 self.blocks[row].append(temp)
+        # If start_blocks is provided, use it
+        if self.start_blocks and len(self.start_blocks) == self.num_row and all(len(row) == self.num_row for row in self.start_blocks):
+            flat_start = [x for row in self.start_blocks for x in row]
+            if sorted(flat_start) == list(range(self.num_row * self.num_row)):
+                self.blocks = copy.deepcopy(self.start_blocks)
+                # Update zero position
+                for row in range(self.num_row):
+                    for column in range(self.num_row):
+                        if self.blocks[row][column] == 0:
+                            self.zero_row = row
+                            self.zero_column = column
+                self.start_blocks = []  # Clear start_blocks after use
+            else:
+                QMessageBox.warning(self, "Invalid Input", "start_blocks contains invalid numbers.")
         # Scrambling the array
         for i in range(self.num_suffle):
             random_num = random.randint(0, 3)
             self.move(Direction(random_num))
-        # If start_blocks is provided, use it
-        if self.start_blocks and len(self.start_blocks) == self.num_row:
-            self.blocks = copy.deepcopy(self.start_blocks)
-            # Update zero position
-            for row in range(self.num_row):
-                for column in range(self.num_row):
-                    if self.blocks[row][column] == 0:
-                        self.zero_row = row
-                        self.zero_column = column
-            self.start_blocks = []  # Clear start_blocks after use
         self.start_blocks = copy.deepcopy(self.blocks)  # Save initial state
         self.updatePanel()
 
@@ -827,31 +852,33 @@ class NumberNPuzzle(QMainWindow):
 
     def simulatePath(self, path):
         self.start_blocks = copy.deepcopy(self.blocks)
-        while path:
-            move = path.pop()
+        # Create a copy of the path to avoid modifying the original
+        path_copy = path.copy()
+        while path_copy:
+            move = path_copy.pop(0)  # Use pop(0) to process moves in correct order
             if move == 'D':
-                self.move(Direction.UP)
-            if move == 'U':
-                self.move(Direction.DOWN)
-            if move == 'R':
-                self.move(Direction.LEFT)
-            if move == 'L':
-                self.move(Direction.RIGHT)
+                self.move(Direction.DOWN)  # Sửa: 'D' -> Direction.DOWN
+            elif move == 'U':
+                self.move(Direction.UP)    # Sửa: 'U' -> Direction.UP
+            elif move == 'R':
+                self.move(Direction.RIGHT) # Sửa: 'R' -> Direction.RIGHT
+            elif move == 'L':
+                self.move(Direction.LEFT)  # Sửa: 'L' -> Direction.LEFT
             self.updatePanel()
             QApplication.processEvents()
             sleep(0.5)
 
     def simulateOneStep(self):
         if self.way:
-            move = self.way.pop()
+            move = self.way.pop(0)  # Use pop(0) to process moves in correct order
             if move == 'D':
-                self.move(Direction.UP)
-            if move == 'U':
-                self.move(Direction.DOWN)
-            if move == 'R':
-                self.move(Direction.LEFT)
-            if move == 'L':
-                self.move(Direction.RIGHT)
+                self.move(Direction.DOWN)  # Sửa: 'D' -> Direction.DOWN
+            elif move == 'U':
+                self.move(Direction.UP)    # Sửa: 'U' -> Direction.UP
+            elif move == 'R':
+                self.move(Direction.RIGHT) # Sửa: 'R' -> Direction.RIGHT
+            elif move == 'L':
+                self.move(Direction.LEFT)  # Sửa: 'L' -> Direction.LEFT
             self.updatePanel()
 
     def move(self, direction):
