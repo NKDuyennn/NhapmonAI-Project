@@ -13,6 +13,10 @@ from algorithm.bfs.bfs import BFSAgent
 from algorithm.ids.ids import IDSAgent
 from algorithm.A_asterisk.A_asterisk import AASTERISK, AASTERISKMisTiles, AASTERISKWeighMHT, GreedyBestFirstSearch, AASTERISKLinearConflict, GreedyLinearConflict
 import math
+import heapq
+import time
+import numpy as np
+import tensorflow as tf
 
 # Using enumeration class to represent direction.
 class Direction(IntEnum):
@@ -20,6 +24,101 @@ class Direction(IntEnum):
     DOWN = 1
     LEFT = 2
     RIGHT = 3
+
+class NPuzzleSolver:
+    def __init__(self, size=5, goal_state=None):
+        self.size = size
+        self.n = size * size
+        if goal_state is None:
+            self.goal_state = [i % self.n for i in range(1, self.n + 1)]
+        else:
+            self.goal_state = goal_state
+
+        # Load Keras model
+        self.model = tf.keras.models.load_model(
+            'C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/model/ann.h5',
+            compile=False
+        )
+
+        # Validate model input size (assuming model expects 4x4 puzzle: 16 * 16 = 256)
+        expected_size = 4  # Model trained for 4x4
+        expected_input_size = (expected_size * expected_size) ** 2  # e.g., 256 for 4x4
+        if self.n != expected_size * expected_size:
+            raise ValueError(f"Model expects a {expected_size}x{expected_size} puzzle (input size {expected_input_size}), but got {size}x{size} (input size {self.n * self.n})")
+
+        self.heuristic_count = 0
+
+    def heuristic(self, state):
+        self.heuristic_count += 1
+        flat_state = [num for row in state for num in row]
+        x_encoded = np.eye(self.n)[flat_state].ravel()
+        output = self.model.predict(x_encoded.reshape(1, -1), verbose=0)
+        estimated_cost = max(output.item(), 0)
+        return estimated_cost
+
+    def find_zero(self, state):
+        for i in range(self.size):
+            for j in range(self.size):
+                if state[i][j] == 0:
+                    return i, j
+
+    def get_neighbors(self, state):
+        neighbors = []
+        x, y = self.find_zero(state)
+        directions = [(-1,0), (1,0), (0,-1), (0,1)]
+        for dx, dy in directions:
+            nx, ny = x + dx, y + dy
+            if 0 <= nx < self.size and 0 <= ny < self.size:
+                new_state = [row[:] for row in state]
+                new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+                neighbors.append(new_state)
+        return neighbors
+
+    def state_to_tuple(self, state):
+        return tuple(tuple(row) for row in state)
+
+    def is_goal(self, state):
+        flat = [num for row in state for num in row]
+        return flat == self.goal_state
+
+    def solve(self, start_state):
+        start_time = time.time()
+        pq = []
+        visited = set()
+        heapq.heappush(pq, (self.heuristic(start_state), 0, start_state, []))  # (f, g, state, path)
+
+        while pq:
+            f, g, current, path = heapq.heappop(pq)
+            state_key = self.state_to_tuple(current)
+
+            if self.is_goal(current):
+                total_time = time.time() - start_time
+                moves = []
+                prev_state = path[0] if path else start_state
+                for state in path[1:] + [current]:
+                    px, py = self.find_zero(prev_state)
+                    cx, cy = self.find_zero(state)
+                    if px > cx:
+                        moves.append('U')
+                    elif px < cx:
+                        moves.append('D')
+                    elif py > cy:
+                        moves.append('L')
+                    elif py < cy:
+                        moves.append('R')
+                    prev_state = state
+                return total_time, g, moves
+
+            if state_key in visited:
+                continue
+            visited.add(state_key)
+
+            for neighbor in self.get_neighbors(current):
+                if self.state_to_tuple(neighbor) not in visited:
+                    h = self.heuristic(neighbor)
+                    heapq.heappush(pq, (g + 1 + h, g + 1, neighbor, path + [current]))
+
+        return None, None, []
 
 class NumberNPuzzle(QMainWindow):
     """ N-puzzle main program """
@@ -36,9 +135,8 @@ class NumberNPuzzle(QMainWindow):
         self.initUI()
 
     def initUI(self):      
-        # Set number block spacing
         self.setObjectName("Main")
-        self.resize(1030, 783)
+        self.resize(1030, 873)
         self.gltMain.setSpacing(20)
         
         self.widget = QtWidgets.QWidget(self)
@@ -46,11 +144,8 @@ class NumberNPuzzle(QMainWindow):
         self.widget.setObjectName("widget")
         self.widget.setLayout(self.gltMain)
         self.gltMain.setSpacing(20)
-        # Set layout.
         self.widget.setLayout(self.gltMain)
-        # Set window title.
         self.setWindowTitle('N-puzzle Game.')
-        # Set window background color.
         self.widget.setStyleSheet("background-color:gray;")
 
         self.pushButton_1 = QtWidgets.QPushButton(self)
@@ -109,6 +204,13 @@ class NumberNPuzzle(QMainWindow):
         font.setWeight(75)
         self.pushButton_8.setFont(font)
         self.pushButton_8.setObjectName("pushButton_8")
+        self.pushButton_9 = QtWidgets.QPushButton(self)
+        self.pushButton_9.setGeometry(QtCore.QRect(730, 770, 281, 31))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.pushButton_9.setFont(font)
+        self.pushButton_9.setObjectName("pushButton_9")
         self.labelCombobox = QtWidgets.QLabel(self)
         self.labelCombobox.setGeometry(QtCore.QRect(20, 10, 200, 21))
         self.labelShuffle = QtWidgets.QLabel(self)
@@ -608,6 +710,64 @@ class NumberNPuzzle(QMainWindow):
         self.num_of_steps_value_8.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.num_of_steps_value_8.setWordWrap(True)
         self.num_of_steps_value_8.setObjectName("num_of_steps_value_8")
+        self.line_33 = QtWidgets.QFrame(self)
+        self.line_33.setGeometry(QtCore.QRect(730, 808, 3, 40))
+        self.line_33.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_33.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_33.setObjectName("line_33")
+        self.line_34 = QtWidgets.QFrame(self)
+        self.line_34.setGeometry(QtCore.QRect(1010, 810, 3, 40))
+        self.line_34.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_34.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_34.setObjectName("line_34")
+        self.line_35 = QtWidgets.QFrame(self)
+        self.line_35.setGeometry(QtCore.QRect(730, 800, 281, 16))
+        self.line_35.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_35.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_35.setObjectName("line_35")
+        self.num_of_steps_9 = QtWidgets.QLabel(self)
+        self.num_of_steps_9.setGeometry(QtCore.QRect(730, 830, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.num_of_steps_9.setFont(font)
+        self.num_of_steps_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.num_of_steps_9.setWordWrap(True)
+        self.num_of_steps_9.setObjectName("num_of_steps_9")
+        self.time_9 = QtWidgets.QLabel(self)
+        self.time_9.setGeometry(QtCore.QRect(730, 810, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.time_9.setFont(font)
+        self.time_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.time_9.setWordWrap(True)
+        self.time_9.setObjectName("time_9")
+        self.line_36 = QtWidgets.QFrame(self)
+        self.line_36.setGeometry(QtCore.QRect(730, 841, 281, 16))
+        self.line_36.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_36.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_36.setObjectName("line_36")
+        self.time_value_9 = QtWidgets.QLabel(self)
+        self.time_value_9.setGeometry(QtCore.QRect(870, 810, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        self.time_value_9.setFont(font)
+        self.time_value_9.setText("")
+        self.time_value_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.time_value_9.setWordWrap(True)
+        self.time_value_9.setObjectName("time_value_9")
+        self.num_of_steps_value_9 = QtWidgets.QLabel(self)
+        self.num_of_steps_value_9.setGeometry(QtCore.QRect(870, 830, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        self.num_of_steps_value_9.setFont(font)
+        self.num_of_steps_value_9.setText("")
+        self.num_of_steps_value_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.num_of_steps_value_9.setWordWrap(True)
+        self.num_of_steps_value_9.setObjectName("num_of_steps_value_9")
 
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -617,36 +777,28 @@ class NumberNPuzzle(QMainWindow):
 
     def reset(self):
         """ Reset the puzzle to a new initial state """
-        # Update number of shuffles if provided
         if self.textShuffle.text():
             try:
                 self.num_suffle = int(self.textShuffle.text())
             except ValueError:
-                self.num_suffle = 100  # Default value if input is invalid
+                self.num_suffle = 100
         
-        # Update number of rows
         self.num_row = int(self.comboBox.currentText())
         
-        # Clear existing widgets from the grid layout
         for i in reversed(range(self.gltMain.count())):
             widget = self.gltMain.itemAt(i).widget()
             if widget is not None:
                 widget.setParent(None)
         
-        # Reset blocks and start_blocks
         self.blocks = []
         self.start_blocks = []
         self.way = []
         
-        # Reset time and step labels
-        for i in range(1, 9):
+        for i in range(1, 10):  # Updated to include ANN
             getattr(self, f"time_value_{i}").setText("")
             getattr(self, f"num_of_steps_value_{i}").setText("")
         
-        # Reinitialize the puzzle
         self.onInit()
-        
-        # Save the initial state
         self.start_blocks = copy.deepcopy(self.blocks)
         
     def retranslateUi(self, Form):
@@ -657,44 +809,38 @@ class NumberNPuzzle(QMainWindow):
             cells = [x for xs in self.blocks for x in xs]
             bfs = BFSAgent(cells, math.isqrt(len(cells)))
             time, num_steps, path = bfs.findMinimumSteps()
-
-            # Tạo path mới với các hướng bị đảo ngược
             reversed_path = []
             reverse_dir = {"R": "L", "L": "R", "U": "D", "D": "U"}
             for step in path:
                 reversed_step = reverse_dir.get(step, step)  
                 reversed_path.append(reversed_step)
             path = reversed_path
-
             print(f"BFS: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_1.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_1.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def IDS():
             cells = [x for xs in self.blocks for x in xs]
             ids = IDSAgent(cells, math.isqrt(len(cells)))
-            time, num_steps, path = ids.findMinimumSteps()  # Updated to unpack three values
-
-            # Tạo path mới với các hướng bị đảo ngược
+            time, num_steps, path = ids.findMinimumSteps()
             reversed_path = []
             reverse_dir = {"R": "L", "L": "R", "U": "D", "D": "U"}
             for step in path:
                 reversed_step = reverse_dir.get(step, step)  
                 reversed_path.append(reversed_step)
             path = reversed_path
-
             print(f"IDS: num_steps={num_steps}, path_length={len(path)}, path={path}")
             a = str(round(time, 5))
             self.time_value_2.setText(_translate("Form", str(a)))
             b = str(num_steps)
             self.num_of_steps_value_2.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def Greedy():
@@ -706,7 +852,7 @@ class NumberNPuzzle(QMainWindow):
             b = str(num_steps)
             self.num_of_steps_value_3.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def AStarMT():
@@ -718,7 +864,7 @@ class NumberNPuzzle(QMainWindow):
             b = str(num_steps)
             self.num_of_steps_value_4.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def AStarMHT():
@@ -730,7 +876,7 @@ class NumberNPuzzle(QMainWindow):
             b = str(num_steps)
             self.num_of_steps_value_5.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def AStarWMHT():
@@ -742,7 +888,7 @@ class NumberNPuzzle(QMainWindow):
             b = str(num_steps)
             self.num_of_steps_value_6.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def AStarLC():
@@ -754,7 +900,7 @@ class NumberNPuzzle(QMainWindow):
             b = str(num_steps)
             self.num_of_steps_value_7.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
 
         def GreedyLC():
@@ -766,8 +912,46 @@ class NumberNPuzzle(QMainWindow):
             b = str(num_steps)
             self.num_of_steps_value_8.setText(_translate("Form", b))
             self.way = path
-            if path:  # Only simulate if path exists
+            if path:
                 self.simulatePath(path)
+
+        def ANN():
+            if self.num_row != 4:
+                QMessageBox.warning(self, "Invalid Puzzle Size", "The ANN solver only supports 4x4 puzzles. Please select 4 rows in the combo box.")
+                self.time_value_9.setText(_translate("Form", "N/A"))
+                self.num_of_steps_value_9.setText(_translate("Form", "N/A"))
+                self.way = []
+                return
+            try:
+                solver = NPuzzleSolver(size=self.num_row)
+                time, num_steps, path = solver.solve(self.blocks)
+
+                reversed_path = []
+                reverse_dir = {"R": "L", "L": "R", "U": "D", "D": "U"}
+                for step in path:
+                    reversed_step = reverse_dir.get(step, step)  
+                    reversed_path.append(reversed_step)
+                path = reversed_path
+                
+                if time is None or num_steps is None:
+                    print("ANN: No solution found")
+                    self.time_value_9.setText(_translate("Form", "N/A"))
+                    self.num_of_steps_value_9.setText(_translate("Form", "N/A"))
+                    self.way = []
+                else:
+                    print(f"ANN: num_steps={num_steps}, path_length={len(path)}, path={path}")
+                    a = str(round(time, 5))
+                    self.time_value_9.setText(_translate("Form", str(a)))
+                    b = str(num_steps)
+                    self.num_of_steps_value_9.setText(_translate("Form", b))
+                    self.way = path
+                    if path:
+                        self.simulatePath(path)
+            except ValueError as e:
+                QMessageBox.warning(self, "Model Error", str(e))
+                self.time_value_9.setText(_translate("Form", "N/A"))
+                self.num_of_steps_value_9.setText(_translate("Form", "N/A"))
+                self.way = []
 
         self.pushButton_1.setText(_translate("Form", "BFS"))
         self.pushButton_1.clicked.connect(BFS)
@@ -785,6 +969,8 @@ class NumberNPuzzle(QMainWindow):
         self.pushButton_7.clicked.connect(AStarLC)
         self.pushButton_8.setText(_translate("Form", "Greedy (Linear Conflict)"))
         self.pushButton_8.clicked.connect(GreedyLC)
+        self.pushButton_9.setText(_translate("Form", "ANN"))
+        self.pushButton_9.clicked.connect(ANN)
 
         self.labelCombobox.setText(_translate("Form", "Number of rows:"))
         self.labelShuffle.setText(_translate("Form", "Shuffle:"))
@@ -802,36 +988,28 @@ class NumberNPuzzle(QMainWindow):
         self.resetBtn.setText(_translate("Form", "Reset"))
 
         def reset():
-            # Update number of shuffles if provided
             if self.textShuffle.text():
                 try:
                     self.num_suffle = int(self.textShuffle.text())
                 except ValueError:
-                    self.num_suffle = 100  # Default value if input is invalid
+                    self.num_suffle = 100
             
-            # Update number of rows
             self.num_row = int(self.comboBox.currentText())
             
-            # Clear existing widgets from the grid layout
             for i in reversed(range(self.gltMain.count())):
                 widget = self.gltMain.itemAt(i).widget()
                 if widget is not None:
                     widget.setParent(None)
             
-            # Reset blocks and start_blocks
             self.blocks = []
             self.start_blocks = []
             self.way = []
             
-            # Reset time and step labels
-            for i in range(1, 9):
+            for i in range(1, 10):  # Updated to include ANN
                 getattr(self, f"time_value_{i}").setText("")
                 getattr(self, f"num_of_steps_value_{i}").setText("")
             
-            # Reinitialize the puzzle
             self.onInit()
-            
-            # Save the initial state
             self.start_blocks = copy.deepcopy(self.blocks)
         
         self.resetBtn.clicked.connect(reset)
@@ -852,12 +1030,12 @@ class NumberNPuzzle(QMainWindow):
         self.time_7.setText(_translate("Form", "  Time: "))
         self.num_of_steps_8.setText(_translate("Form", "  Number of steps: "))
         self.time_8.setText(_translate("Form", "  Time: "))
+        self.num_of_steps_9.setText(_translate("Form", "  Number of steps: "))
+        self.time_9.setText(_translate("Form", "  Time: "))
 
     def onInit(self):
-        # Create sequential array
         self.numbers = list(range(1, self.num_row * self.num_row))
         self.numbers.append(0)
-        # Add number to the two-dimensional array
         self.blocks = []
         for row in range(self.num_row):
             self.blocks.append([])
@@ -867,25 +1045,22 @@ class NumberNPuzzle(QMainWindow):
                     self.zero_row = row
                     self.zero_column = column
                 self.blocks[row].append(temp)
-        # If start_blocks is provided, use it
         if self.start_blocks and len(self.start_blocks) == self.num_row and all(len(row) == self.num_row for row in self.start_blocks):
             flat_start = [x for row in self.start_blocks for x in row]
             if sorted(flat_start) == list(range(self.num_row * self.num_row)):
                 self.blocks = copy.deepcopy(self.start_blocks)
-                # Update zero position
                 for row in range(self.num_row):
                     for column in range(self.num_row):
                         if self.blocks[row][column] == 0:
                             self.zero_row = row
                             self.zero_column = column
-                self.start_blocks = []  # Clear start_blocks after use
+                self.start_blocks = []
             else:
                 QMessageBox.warning(self, "Invalid Input", "start_blocks contains invalid numbers.")
-        # Scrambling the array
         for i in range(self.num_suffle):
             random_num = random.randint(0, 3)
             self.move(Direction(random_num))
-        self.start_blocks = copy.deepcopy(self.blocks)  # Save initial state
+        self.start_blocks = copy.deepcopy(self.blocks)
         self.updatePanel()
 
     def resetStartBlock(self):
@@ -920,7 +1095,6 @@ class NumberNPuzzle(QMainWindow):
                 self.reset()
 
     def simulatePath(self, path):
-        # Reset to initial state
         self.blocks = copy.deepcopy(self.start_blocks)
         for i in range(self.num_row):
             for j in range(self.num_row):
@@ -929,9 +1103,7 @@ class NumberNPuzzle(QMainWindow):
                     self.zero_column = j
         self.updatePanel()
         QApplication.processEvents()
-        # Simulate each move
-        path_copy = path.copy()
-        for move in path_copy:
+        for move in path:
             if move == 'D':
                 self.move(Direction.DOWN)
             elif move == 'U':
@@ -942,11 +1114,11 @@ class NumberNPuzzle(QMainWindow):
                 self.move(Direction.LEFT)
             self.updatePanel()
             QApplication.processEvents()
-            sleep(0.5)  # Adjust sleep time for visibility
+            sleep(0.5)
 
     def simulateOneStep(self):
         if self.way:
-            move = self.way.pop(0)  # Use pop(0) to process moves in correct order
+            move = self.way.pop(0)
             if move == 'D':
                 self.move(Direction.DOWN)
             elif move == 'U':
@@ -980,12 +1152,10 @@ class NumberNPuzzle(QMainWindow):
                 self.zero_column -= 1
 
     def updatePanel(self):
-        # Clear existing widgets
         for i in reversed(range(self.gltMain.count())):
             widget = self.gltMain.itemAt(i).widget()
             if widget is not None:
                 widget.setParent(None)
-        # Add new widgets
         for row in range(self.num_row):
             for column in range(self.num_row):
                 self.gltMain.addWidget(Block(self.blocks[row][column], int(720 / self.num_row) - 15), row, column)
@@ -1001,8 +1171,6 @@ class NumberNPuzzle(QMainWindow):
                 if self.blocks[row][column] != row * self.num_row + column + 1:
                     return False
         return True
-    
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
