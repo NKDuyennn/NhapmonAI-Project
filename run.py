@@ -26,7 +26,7 @@ class Direction(IntEnum):
     RIGHT = 3
 
 class NPuzzleSolver:
-    def __init__(self, size=5, goal_state=None):
+    def __init__(self, size=5, goal_state=None, model_path='C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/model/keras-1024-1024-512-128-64-amse08.h5'):
         self.size = size
         self.n = size * size
         if goal_state is None:
@@ -36,7 +36,7 @@ class NPuzzleSolver:
 
         # Load Keras model
         self.model = tf.keras.models.load_model(
-            'C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/model/ann.h5',
+            model_path,
             compile=False
         )
 
@@ -136,7 +136,7 @@ class NumberNPuzzle(QMainWindow):
 
     def initUI(self):      
         self.setObjectName("Main")
-        self.resize(1030, 873)
+        self.resize(1030, 963)  # Increased height to accommodate new button
         self.gltMain.setSpacing(20)
         
         self.widget = QtWidgets.QWidget(self)
@@ -211,6 +211,13 @@ class NumberNPuzzle(QMainWindow):
         font.setWeight(75)
         self.pushButton_9.setFont(font)
         self.pushButton_9.setObjectName("pushButton_9")
+        self.pushButton_10 = QtWidgets.QPushButton(self)
+        self.pushButton_10.setGeometry(QtCore.QRect(730, 860, 281, 31))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.pushButton_10.setFont(font)
+        self.pushButton_10.setObjectName("pushButton_10")
         self.labelCombobox = QtWidgets.QLabel(self)
         self.labelCombobox.setGeometry(QtCore.QRect(20, 10, 200, 21))
         self.labelShuffle = QtWidgets.QLabel(self)
@@ -768,6 +775,64 @@ class NumberNPuzzle(QMainWindow):
         self.num_of_steps_value_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.num_of_steps_value_9.setWordWrap(True)
         self.num_of_steps_value_9.setObjectName("num_of_steps_value_9")
+        self.line_37 = QtWidgets.QFrame(self)
+        self.line_37.setGeometry(QtCore.QRect(730, 898, 3, 40))
+        self.line_37.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_37.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_37.setObjectName("line_37")
+        self.line_38 = QtWidgets.QFrame(self)
+        self.line_38.setGeometry(QtCore.QRect(1010, 900, 3, 40))
+        self.line_38.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line_38.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_38.setObjectName("line_38")
+        self.line_39 = QtWidgets.QFrame(self)
+        self.line_39.setGeometry(QtCore.QRect(730, 890, 281, 16))
+        self.line_39.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_39.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_39.setObjectName("line_39")
+        self.num_of_steps_10 = QtWidgets.QLabel(self)
+        self.num_of_steps_10.setGeometry(QtCore.QRect(730, 920, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.num_of_steps_10.setFont(font)
+        self.num_of_steps_10.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.num_of_steps_10.setWordWrap(True)
+        self.num_of_steps_10.setObjectName("num_of_steps_10")
+        self.time_10 = QtWidgets.QLabel(self)
+        self.time_10.setGeometry(QtCore.QRect(730, 900, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        self.time_10.setFont(font)
+        self.time_10.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.time_10.setWordWrap(True)
+        self.time_10.setObjectName("time_10")
+        self.line_40 = QtWidgets.QFrame(self)
+        self.line_40.setGeometry(QtCore.QRect(730, 931, 281, 16))
+        self.line_40.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_40.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_40.setObjectName("line_40")
+        self.time_value_10 = QtWidgets.QLabel(self)
+        self.time_value_10.setGeometry(QtCore.QRect(870, 900, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        self.time_value_10.setFont(font)
+        self.time_value_10.setText("")
+        self.time_value_10.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.time_value_10.setWordWrap(True)
+        self.time_value_10.setObjectName("time_value_10")
+        self.num_of_steps_value_10 = QtWidgets.QLabel(self)
+        self.num_of_steps_value_10.setGeometry(QtCore.QRect(870, 920, 201, 16))
+        font = QtGui.QFont()
+        font.setBold(False)
+        font.setWeight(50)
+        self.num_of_steps_value_10.setFont(font)
+        self.num_of_steps_value_10.setText("")
+        self.num_of_steps_value_10.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.num_of_steps_value_10.setWordWrap(True)
+        self.num_of_steps_value_10.setObjectName("num_of_steps_value_10")
 
         self.retranslateUi(self)
         QtCore.QMetaObject.connectSlotsByName(self)
@@ -794,7 +859,7 @@ class NumberNPuzzle(QMainWindow):
         self.start_blocks = []
         self.way = []
         
-        for i in range(1, 10):  # Updated to include ANN
+        for i in range(1, 11):  # Updated to include ANN2
             getattr(self, f"time_value_{i}").setText("")
             getattr(self, f"num_of_steps_value_{i}").setText("")
         
@@ -923,7 +988,7 @@ class NumberNPuzzle(QMainWindow):
                 self.way = []
                 return
             try:
-                solver = NPuzzleSolver(size=self.num_row)
+                solver = NPuzzleSolver(size=self.num_row, model_path='C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/model/keras-1024-1024-512-128-64-amse04.h5')
                 time, num_steps, path = solver.solve(self.blocks)
 
                 reversed_path = []
@@ -953,6 +1018,44 @@ class NumberNPuzzle(QMainWindow):
                 self.num_of_steps_value_9.setText(_translate("Form", "N/A"))
                 self.way = []
 
+        def ANN2():
+            if self.num_row != 4:
+                QMessageBox.warning(self, "Invalid Puzzle Size", "The ANN2 solver only supports 4x4 puzzles. Please select 4 rows in the combo box.")
+                self.time_value_10.setText(_translate("Form", "N/A"))
+                self.num_of_steps_value_10.setText(_translate("Form", "N/A"))
+                self.way = []
+                return
+            try:
+                solver = NPuzzleSolver(size=self.num_row, model_path='C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/model/keras-1024-1024-512-128-64-amse08.h5')
+                time, num_steps, path = solver.solve(self.blocks)
+
+                reversed_path = []
+                reverse_dir = {"R": "L", "L": "R", "U": "D", "D": "U"}
+                for step in path:
+                    reversed_step = reverse_dir.get(step, step)  
+                    reversed_path.append(reversed_step)
+                path = reversed_path
+                
+                if time is None or num_steps is None:
+                    print("ANN2: No solution found")
+                    self.time_value_10.setText(_translate("Form", "N/A"))
+                    self.num_of_steps_value_10.setText(_translate("Form", "N/A"))
+                    self.way = []
+                else:
+                    print(f"ANN2: num_steps={num_steps}, path_length={len(path)}, path={path}")
+                    a = str(round(time, 5))
+                    self.time_value_10.setText(_translate("Form", str(a)))
+                    b = str(num_steps)
+                    self.num_of_steps_value_10.setText(_translate("Form", b))
+                    self.way = path
+                    if path:
+                        self.simulatePath(path)
+            except ValueError as e:
+                QMessageBox.warning(self, "Model Error", str(e))
+                self.time_value_10.setText(_translate("Form", "N/A"))
+                self.num_of_steps_value_10.setText(_translate("Form", "N/A"))
+                self.way = []
+
         self.pushButton_1.setText(_translate("Form", "BFS"))
         self.pushButton_1.clicked.connect(BFS)
         self.pushButton_2.setText(_translate("Form", "IDS"))
@@ -971,6 +1074,8 @@ class NumberNPuzzle(QMainWindow):
         self.pushButton_8.clicked.connect(GreedyLC)
         self.pushButton_9.setText(_translate("Form", "ANN"))
         self.pushButton_9.clicked.connect(ANN)
+        self.pushButton_10.setText(_translate("Form", "ANN2"))
+        self.pushButton_10.clicked.connect(ANN2)
 
         self.labelCombobox.setText(_translate("Form", "Number of rows:"))
         self.labelShuffle.setText(_translate("Form", "Shuffle:"))
@@ -1005,7 +1110,7 @@ class NumberNPuzzle(QMainWindow):
             self.start_blocks = []
             self.way = []
             
-            for i in range(1, 10):  # Updated to include ANN
+            for i in range(1, 11):  # Updated to include ANN2
                 getattr(self, f"time_value_{i}").setText("")
                 getattr(self, f"num_of_steps_value_{i}").setText("")
             
@@ -1032,6 +1137,8 @@ class NumberNPuzzle(QMainWindow):
         self.time_8.setText(_translate("Form", "  Time: "))
         self.num_of_steps_9.setText(_translate("Form", "  Number of steps: "))
         self.time_9.setText(_translate("Form", "  Time: "))
+        self.num_of_steps_10.setText(_translate("Form", "  Number of steps: "))
+        self.time_10.setText(_translate("Form", "  Time: "))
 
     def onInit(self):
         self.numbers = list(range(1, self.num_row * self.num_row))

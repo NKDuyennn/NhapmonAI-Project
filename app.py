@@ -1237,5 +1237,5 @@ class NumberNPuzzle(QMainWindow):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     # Replace with actual image URL
-    ex = NumberNPuzzle(image_url="C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/Image/hust.jpg")
+    ex = NumberNPuzzle(image_url="C:/Users/DUYEN/OneDrive/Documents/GitHub/NhapmonAI-Project/Image/aespa_logo.jpg")
     sys.exit(app.exec_())
